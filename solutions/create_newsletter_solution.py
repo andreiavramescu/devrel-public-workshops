@@ -34,7 +34,7 @@ def selected_quotes(context: dict) -> dict:
 
     raw_zen_quotes = context["ti"].xcom_pull(
         dag_id="raw_zen_quotes",
-        task_ids=["raw_zen_quotes"],
+        task_ids="raw_zen_quotes",
         key="return_value",
         include_prior_dates=True,
     )
@@ -74,7 +74,7 @@ def formatted_newsletter(context: dict) -> None:
 
     selected_quotes = context["ti"].xcom_pull(
         dag_id="selected_quotes",
-        task_ids=["selected_quotes"],
+        task_ids="selected_quotes",
         key="return_value",
         include_prior_dates=True,
     )

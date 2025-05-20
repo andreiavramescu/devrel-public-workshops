@@ -1,5 +1,8 @@
-from airflow.sdk import asset
+import logging
 import os
+
+from airflow.sdk import asset
+
 
 # set these enviroment variables in order to store the newsletter 
 # in cloud object storage instead of the local filesystem
@@ -9,6 +12,9 @@ OBJECT_STORAGE_PATH_NEWSLETTER = os.getenv(
     "OBJECT_STORAGE_PATH_NEWSLETTER",
     default="include/newsletter",
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 @asset(schedule="@daily")
@@ -29,16 +35,16 @@ def selected_quotes(context: dict) -> dict:
     """
     Transforms the extracted raw_zen_quotes.
     """
-
     import numpy as np
 
     raw_zen_quotes = context["ti"].xcom_pull(
         dag_id="raw_zen_quotes",
-        task_ids=["raw_zen_quotes"],
+        task_ids="raw_zen_quotes",  # FIXED: use string, not list
         key="return_value",
         include_prior_dates=True,
     )
 
+    logger.info("Before quote_character_counts", raw_zen_quotes)
     quotes_character_counts = [int(quote["c"]) for quote in raw_zen_quotes]
     median = np.median(quotes_character_counts)
 
@@ -55,3 +61,4 @@ def selected_quotes(context: dict) -> dict:
         "short_q": short_quote,
         "long_q": long_quote,
     }
+
